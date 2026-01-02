@@ -1,5 +1,9 @@
 # py-ydt1363
 
+[![PyPI version](https://img.shields.io/pypi/v/ydt1363)](https://pypi.org/project/ydt1363/)
+![License](https://img.shields.io/pypi/l/ydt1363)
+![Python versions](https://img.shields.io/pypi/pyversions/ydt1363)
+
 Python implementation for YDT 1363 protocol.
 
 ## Installation
