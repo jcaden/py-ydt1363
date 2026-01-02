@@ -4,18 +4,21 @@ EOI = 0x0D  # End of Information (\r)
 VER = 0x22  # Protocol version (Fixed to 2.2 for generic responses)
 CID1_BMS = 0x4A  # Typical ID for LFP BMS (Lithium Iron Phosphate)
 
+
 def to_ascii_hex_bytes(value: int, width: int = 1) -> bytes:
     """
     Converts an integer to its ASCII Hex representation.
     Example: 0x4B -> b'4B'
-    According to section 8.1, bytes are split into two ASCII codes. 
+    According to section 8.1, bytes are split into two ASCII codes.
     """
     fmt = f"{{:0{width * 2}X}}"
-    return fmt.format(value).encode('ascii')
+    return fmt.format(value).encode("ascii")
+
 
 def from_ascii_hex_bytes(data: bytes) -> int:
     """Converts ASCII Hex bytes to an integer. Example: b'4B' -> 0x4B"""
     return int(data, 16)
+
 
 def calculate_lchksum(lenid: int) -> int:
     """
@@ -29,11 +32,12 @@ def calculate_lchksum(lenid: int) -> int:
     mid = (lenid & 0x0F0) >> 4
     # D3-D0
     low = lenid & 0x00F
-    
+
     sum_val = high + mid + low
     remainder = sum_val % 16
     checksum = (~remainder & 0x0F) + 1
     return checksum & 0x0F
+
 
 def calculate_chksum(ascii_data: bytes) -> bytes:
     """

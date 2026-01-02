@@ -4,6 +4,7 @@ Basic tests for the ydt1363 package.
 
 import ydt1363
 
+
 def test_version():
     """Test that the package has a version."""
     assert hasattr(ydt1363, "__version__")
