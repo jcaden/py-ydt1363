@@ -6,4 +6,7 @@ This library provides functionality to work with the YDT 1363 protocol.
 
 __version__ = "0.1.0"
 __author__ = "José Antonio Santos Cadenas"
-__all__ = []
+__all__ = ["BMSProtocol", "BMSFrame"]
+
+from .protocol import BMSProtocol
+from .frame import BMSFrame
