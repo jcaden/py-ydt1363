@@ -32,6 +32,8 @@ dev = [
     "black>=22.0",
     "flake8>=4.0",
     "mypy>=0.950",
+    "pylint>=4.0.4",
+    "bandit>=1.9.2"
 ]
 
 [project.urls]
