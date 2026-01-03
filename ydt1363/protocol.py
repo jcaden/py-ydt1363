@@ -4,7 +4,7 @@ Protocol parsing and packet generation
 
 import logging
 from typing import List
-from .utils import SOI, EOI, VER
+from .utils import SOI, EOI
 from .frame import BMSFrame, InfoType
 
 logger = logging.getLogger(__name__)
@@ -62,5 +62,5 @@ class BMSProtocol:
 
     def build_frame(self, adr: int, cid1: int, cid2: int, info: InfoType) -> bytes:
         """Helper to quickly create output bytes."""
-        frame = BMSFrame(ver=VER, adr=adr, cid1=cid1, cid2=cid2, info=info)
+        frame = BMSFrame(adr=adr, cid1=cid1, cid2=cid2, info=info)
         return frame.serialize()

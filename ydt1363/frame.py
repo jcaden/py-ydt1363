@@ -8,6 +8,7 @@ import binascii
 import logging
 from flags import Flags
 from .utils import (
+    VER,
     to_ascii_hex_bytes,
     calculate_lchksum,
     calculate_chksum,
@@ -385,14 +386,12 @@ class BMSFrame:
     Structure based on Table 1.
     """
 
-    ver: int
     adr: int
     cid1: int
     cid2: int
     info: InfoType
 
-    def __init__(self, ver: int, adr: int, cid1: int, cid2: int, info: InfoType):
-        self.ver = ver
+    def __init__(self, adr: int, cid1: int, cid2: int, info: InfoType):
         self.adr = adr
         self.cid1 = cid1
         self.cid2 = cid2
@@ -403,7 +402,7 @@ class BMSFrame:
     def deserialize(cls, packet: bytearray):
         """
         Parses a raw packet (including SOI and EOI) and validates checksums.
-        packet format: b'~20014A...' + b'\r'
+        packet format: b'>20014A...' + b'\r'
         """
         # The ASCII content is between SOI (index 0) and CHKSUM (last 5 bytes: 4 chk + 1 EOI)
         # Structure: SOI (1) | BODY_ASCII (N) | CHKSUM_ASCII (4) | EOI (1)
@@ -425,14 +424,14 @@ class BMSFrame:
 
         # 2. Decode ASCII fields to integers
         # VER (2 chars), ADR (2 chars), CID1 (2 chars), CID2 (2 chars), LENGTH (4 chars)
-        try:
-            ver = from_ascii_hex_bytes(ascii_body[0:2])
-            adr = from_ascii_hex_bytes(ascii_body[2:4])
-            cid1 = from_ascii_hex_bytes(ascii_body[4:6])
-            cid2 = from_ascii_hex_bytes(ascii_body[6:8])
-            length_field = from_ascii_hex_bytes(ascii_body[8:12])
-        except ValueError as e:
-            raise ValueError("Hex Decoding Error") from e
+        ver = from_ascii_hex_bytes(ascii_body[0:2])
+        adr = from_ascii_hex_bytes(ascii_body[2:4])
+        cid1 = from_ascii_hex_bytes(ascii_body[4:6])
+        cid2 = from_ascii_hex_bytes(ascii_body[6:8])
+        length_field = from_ascii_hex_bytes(ascii_body[8:12])
+
+        if ver != VER:
+            raise ValueError(f"Unsupported VER: {ver:02X}")
 
         # 3. Validate LENGTH and LCHKSUM
         lchksum_rec = (length_field & 0xF000) >> 12
@@ -454,7 +453,6 @@ class BMSFrame:
             )
 
         return BMSFrame(
-            ver=ver,
             adr=adr,
             cid1=cid1,
             cid2=cid2,
@@ -476,7 +474,7 @@ class BMSFrame:
             self.info = info
 
     def __str__(self) -> str:
-        return f"BMSFrame(VER={self.ver:02X}, ADR={self.adr:02X}, CID1={self.cid1:02X}, CID2={self.cid2:02X}, INFO={self.info}"
+        return f"BMSFrame(ADR={self.adr:02X}, CID1={self.cid1:02X}, CID2={self.cid2:02X}, INFO={self.info}"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -498,7 +496,7 @@ class BMSFrame:
         # Note: SOI and EOI are NOT converted to ASCII hex, they remain raw
 
         payload_ascii = b""
-        payload_ascii += to_ascii_hex_bytes(self.ver, 1)
+        payload_ascii += to_ascii_hex_bytes(VER, 1)
         payload_ascii += to_ascii_hex_bytes(self.adr, 1)
         payload_ascii += to_ascii_hex_bytes(self.cid1, 1)
         payload_ascii += to_ascii_hex_bytes(self.cid2, 1)

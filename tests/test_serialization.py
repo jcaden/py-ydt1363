@@ -4,6 +4,7 @@ Serialization test
 
 import binascii
 from ydt1363 import BMSProtocol
+import ydt1363
 
 PACKETS = [
     # pylint: disable=line-too-long
@@ -95,4 +96,15 @@ def test_packet_wrong_checksum():
     p = BMSProtocol()
 
     frames = p.feed_data(binascii.unhexlify(b"3e3232303138343834453030323031464432410d"))
+    assert len(frames) == 0
+
+
+def test_invalid_version():
+    """Test that packets with invalid version are ignored."""
+    p = BMSProtocol()
+
+    body = binascii.unhexlify(b"3233303138343834453030323031")
+    chksum = ydt1363.utils.calculate_chksum(body)
+
+    frames = p.feed_data(b">" + body + chksum + b"\r")
     assert len(frames) == 0
