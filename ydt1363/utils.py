@@ -1,3 +1,5 @@
+"""Utility functions and constants for YDT1363 protocol handling."""
+
 # Constant definitions according to Table 1 and Table 2
 SOI = 0x3E  # Start of Information (>)
 EOI = 0x0D  # End of Information (\r)

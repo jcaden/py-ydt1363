@@ -1,12 +1,20 @@
-from typing import List
-from .utils import SOI, EOI, VER
-from .frame import BMSFrame, InfoType
+"""
+Protocol parsing and packet generation
+"""
+
 import logging
+from typing import List
+from .utils import SOI, EOI
+from .frame import BMSFrame, InfoType
 
 logger = logging.getLogger(__name__)
 
 
 class BMSProtocol:
+    """
+    Handles parsing and building of YDT1363 protocol packets.
+    """
+
     def __init__(self):
         self._buffer = bytearray()
 
@@ -16,7 +24,7 @@ class BMSProtocol:
         Returns a list of decoded BMSFrames if packets are completed.
         """
         self._buffer.extend(data)
-        frames = []
+        frames: List[BMSFrame] = []
 
         while True:
             # Look for SOI
@@ -48,11 +56,11 @@ class BMSProtocol:
             except ValueError as e:
                 # Checksum failed or invalid format.
                 # Discard only the SOI and try to find another SOI inside.
-                logger.error(f"Error parsing packet: {e}")
+                logger.error("Error parsing packet: %s", str(e))
                 del self._buffer[0]
                 continue
 
     def build_frame(self, adr: int, cid1: int, cid2: int, info: InfoType) -> bytes:
         """Helper to quickly create output bytes."""
-        frame = BMSFrame(ver=VER, adr=adr, cid1=cid1, cid2=cid2, info=info)
+        frame = BMSFrame(adr=adr, cid1=cid1, cid2=cid2, info=info)
         return frame.serialize()

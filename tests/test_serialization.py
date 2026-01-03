@@ -2,10 +2,12 @@
 Serialization test
 """
 
-from ydt1363 import BMSProtocol
 import binascii
+from ydt1363 import BMSProtocol
+import ydt1363
 
 PACKETS = [
+    # pylint: disable=line-too-long
     b"3e3232303138343834453030323031464432420d",
     b"3e323230313835383534304330303146373833313436353030354630303634373031343735333037353330303033463130304343303043424630434330304343313043433230434330304342463043424530434243304342453043424530434245304342463043433130434333304342443034303037383030383230303843303038323030383230303936443030303030303030303032303030303030303030303233303030303030303233393233303230303036304343333043424330303936303037383438343434453230443438450d",
     b"3e3232303238343834453030323032464432390d",
@@ -54,6 +56,7 @@ def test_serialization():
 
 
 def test_serialization_no_soi():
+    """Test that packets without SOI are ignored."""
     p = BMSProtocol()
 
     # No SOI
@@ -62,6 +65,7 @@ def test_serialization_no_soi():
     # SOI is not at the beginning
     frames = p.feed_data(
         binascii.unhexlify(
+            # pylint: disable=line-too-long
             b"3232303938343834453030323039464431420d3e3232304138343834453030323041464430420d3e3232304238343834453030323042464430390d"
         )
     )
@@ -69,6 +73,7 @@ def test_serialization_no_soi():
 
 
 def test_serialization_no_eoi():
+    """Test that packets without EOI are buffered until complete."""
     p = BMSProtocol()
 
     # No EOI
@@ -79,6 +84,7 @@ def test_serialization_no_eoi():
 
 
 def test_packet_too_short():
+    """Test that too short packets are ignored."""
     p = BMSProtocol()
 
     frames = p.feed_data(binascii.unhexlify(b"3e3232300d"))
@@ -86,7 +92,19 @@ def test_packet_too_short():
 
 
 def test_packet_wrong_checksum():
+    """Test that packets with wrong checksum are ignored."""
     p = BMSProtocol()
 
     frames = p.feed_data(binascii.unhexlify(b"3e3232303138343834453030323031464432410d"))
+    assert len(frames) == 0
+
+
+def test_invalid_version():
+    """Test that packets with invalid version are ignored."""
+    p = BMSProtocol()
+
+    body = binascii.unhexlify(b"3233303138343834453030323031")
+    chksum = ydt1363.utils.calculate_chksum(body)
+
+    frames = p.feed_data(b">" + body + chksum + b"\r")
     assert len(frames) == 0
