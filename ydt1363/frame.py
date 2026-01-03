@@ -1,5 +1,12 @@
+"""
+YD/T 1363 Protocol Frame Definitions and Parsing
+"""
+
 from dataclasses import dataclass
 from enum import Enum
+import binascii
+import logging
+from flags import Flags
 from .utils import (
     to_ascii_hex_bytes,
     calculate_lchksum,
@@ -8,14 +15,15 @@ from .utils import (
     SOI,
     EOI,
 )
-import binascii
-from flags import Flags
-import logging
 
 logger = logging.getLogger(__name__)
 
 
 class PackStatus(Flags):
+    """
+    Represents the Pack Status flags as per Table 58.
+    """
+
     discharge_overcurrent_protection = ()
     short_circuit_protection = ()
     undervoltage_protection = ()
@@ -35,6 +43,10 @@ class PackStatus(Flags):
 
 
 class VoltageStatus(Flags):
+    """
+    Represents the Voltage Status flags as per Table 58.
+    """
+
     single_cell_overvoltage_protection = ()
     single_cell_undervoltage_protection = ()
     total_voltage_overvoltage_protection = ()
@@ -54,6 +66,8 @@ class VoltageStatus(Flags):
 
 
 class CurrentState(Flags):
+    """Represents the Current State flags as per Table 58."""
+
     charging = ()
     discharging = ()
     charging_overcurrent_protection = ()
@@ -73,6 +87,8 @@ class CurrentState(Flags):
 
 
 class BatteryStatus(Enum):
+    """Represents the Battery Status as per Table 58."""
+
     DISCHARGE = 0
     CHARGING = 1
     LOAD_IN_POSITION = 2
@@ -81,6 +97,8 @@ class BatteryStatus(Enum):
 
 
 class TemperatureState(Flags):
+    """Represents the Temperature State flags as per Table 58."""
+
     charging_high_temperature_protection = ()
     charging_low_temperature_protection = ()
     discharge_high_temperature_protection = ()
@@ -100,6 +118,8 @@ class TemperatureState(Flags):
 
 
 class FetStatus(Flags):
+    """Represents the FET Status flags as per Table 58."""
+
     charging_mos_status = ()
     discharge_mos_status = ()
     damaged_discharge_mos = ()
@@ -119,6 +139,8 @@ class FetStatus(Flags):
 
 
 class CurrentLimit(Enum):
+    """Represents the Current Limit settings as per Table 58."""
+
     NO_LIMIT = 0
     LIMIT_20A = 1
     LIMIT_10A = 2
@@ -126,6 +148,8 @@ class CurrentLimit(Enum):
 
 
 class StateMachine(Flags):
+    """Represents the State Machine flags as per Table 58."""
+
     initialization = ()
     self_test = ()
     ready = ()
@@ -137,6 +161,8 @@ class StateMachine(Flags):
 
 
 class InputOutputStatus(Flags):
+    """Represents the Input/Output Status flags as per Table 58."""
+
     charger_online = ()
     acc_signal = ()
     on_signal = ()
@@ -161,8 +187,11 @@ class RealtimeDataFrame:
     Structure based on Table 57.
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, data: bytes):
         """Parses the Realtime Data Frame from raw bytes."""
+        # pylint: disable=too-many-statements
         self.slave_addr = data[0]
         self.current = int.from_bytes(data[1:3], "big") / 1000
         self.total_voltage = int.from_bytes(data[3:5], "big") / 100
@@ -317,17 +346,26 @@ class RealtimeDataFrame:
 
 @dataclass
 class InfoType:
+    """
+    Represents the INFO field of a Frame that can have different types depending on the frame type.
+    It offers a common interface for serialization and string representation.
+    """
+
     info = bytes | RealtimeDataFrame
 
     def serialize(self) -> bytes:
+        """
+        Serializes the info field into bytes for frame serialization.
+        """
         if isinstance(self.info, bytes):
             return self.info
-        elif isinstance(self.info, RealtimeDataFrame):
+
+        if isinstance(self.info, RealtimeDataFrame):
             return self.info.serialize()
-        else:
-            raise TypeError(
-                f"Unexpected type for info, found {type(self.info)} expected bytes or RealtimeDataFrame"
-            )
+
+        raise TypeError(
+            f"Unexpected type for info, found {type(self.info)} expected bytes or RealtimeDataFrame"
+        )
 
     def __init__(self, info: bytes | RealtimeDataFrame):
         self.info = info
@@ -393,8 +431,8 @@ class BMSFrame:
             cid1 = from_ascii_hex_bytes(ascii_body[4:6])
             cid2 = from_ascii_hex_bytes(ascii_body[6:8])
             length_field = from_ascii_hex_bytes(ascii_body[8:12])
-        except ValueError:
-            raise ValueError("Hex Decoding Error")
+        except ValueError as e:
+            raise ValueError("Hex Decoding Error") from e
 
         # 3. Validate LENGTH and LCHKSUM
         lchksum_rec = (length_field & 0xF000) >> 12
@@ -402,7 +440,7 @@ class BMSFrame:
 
         lchksum_calc = calculate_lchksum(lenid)
         if lchksum_rec != lchksum_calc:
-            logger.debug(f"LCHKSUM Error: Received {lchksum_rec}, Calculated {lchksum_calc}")
+            logger.debug("LCHKSUM Error: Received %i, Calculated %i", lchksum_rec, lchksum_calc)
             raise ValueError("LCHKSUM Error")
 
         # 4. Extract INFO

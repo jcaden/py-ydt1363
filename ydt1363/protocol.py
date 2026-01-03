@@ -1,12 +1,20 @@
+"""
+Protocol parsing and packet generation
+"""
+
+import logging
 from typing import List
 from .utils import SOI, EOI, VER
 from .frame import BMSFrame, InfoType
-import logging
 
 logger = logging.getLogger(__name__)
 
 
 class BMSProtocol:
+    """
+    Handles parsing and building of YDT1363 protocol packets.
+    """
+
     def __init__(self):
         self._buffer = bytearray()
 
@@ -48,7 +56,7 @@ class BMSProtocol:
             except ValueError as e:
                 # Checksum failed or invalid format.
                 # Discard only the SOI and try to find another SOI inside.
-                logger.error(f"Error parsing packet: {e}")
+                logger.error("Error parsing packet: %s", str(e))
                 del self._buffer[0]
                 continue
 

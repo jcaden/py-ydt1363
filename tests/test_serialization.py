@@ -2,8 +2,8 @@
 Serialization test
 """
 
-from ydt1363 import BMSProtocol
 import binascii
+from ydt1363 import BMSProtocol
 
 PACKETS = [
     # pylint: disable=line-too-long
@@ -55,6 +55,7 @@ def test_serialization():
 
 
 def test_serialization_no_soi():
+    """Test that packets without SOI are ignored."""
     p = BMSProtocol()
 
     # No SOI
@@ -71,6 +72,7 @@ def test_serialization_no_soi():
 
 
 def test_serialization_no_eoi():
+    """Test that packets without EOI are buffered until complete."""
     p = BMSProtocol()
 
     # No EOI
@@ -81,6 +83,7 @@ def test_serialization_no_eoi():
 
 
 def test_packet_too_short():
+    """Test that too short packets are ignored."""
     p = BMSProtocol()
 
     frames = p.feed_data(binascii.unhexlify(b"3e3232300d"))
@@ -88,6 +91,7 @@ def test_packet_too_short():
 
 
 def test_packet_wrong_checksum():
+    """Test that packets with wrong checksum are ignored."""
     p = BMSProtocol()
 
     frames = p.feed_data(binascii.unhexlify(b"3e3232303138343834453030323031464432410d"))
