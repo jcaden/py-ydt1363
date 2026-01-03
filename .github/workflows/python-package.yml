@@ -37,7 +37,7 @@ jobs:
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         
-        flake8 ydt1363 tests --count  --max-complexity=10  --max-line-length=500 --statistics
+        flake8 ydt1363 tests --count  --max-complexity=10  --max-line-length=500 --statistics --ignore E203
     - name: Lint with pylint
       run: pylint ydt1363 tests --max-line-length=127
     - name: Lint with bandit

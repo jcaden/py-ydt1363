@@ -174,58 +174,58 @@ class RealtimeDataFrame:
         self.number_of_cycles = int.from_bytes(data[15:17], "big")
         self.number_of_cells = data[17]
         self.cell_voltages = [
-            int.from_bytes(data[18 + i * 2: 20 + i * 2], "big") / 1000
+            int.from_bytes(data[18 + i * 2 : 20 + i * 2], "big") / 1000
             for i in range(self.number_of_cells)
         ]
         index = 18 + self.number_of_cells * 2
         self.cell_temperature = data[index]
         index += 1
         self.battery_temperature = [
-            int.from_bytes(data[index + i * 2: index + i * 2 + 2], "big") / 10 for i in range(4)
+            int.from_bytes(data[index + i * 2 : index + i * 2 + 2], "big") / 10 for i in range(4)
         ]
         index += 8
-        self.mos_temperature = int.from_bytes(data[index: index + 2], "big") / 10
+        self.mos_temperature = int.from_bytes(data[index : index + 2], "big") / 10
         index += 2
-        self.env_temperature = int.from_bytes(data[index: index + 2], "big") / 10
+        self.env_temperature = int.from_bytes(data[index : index + 2], "big") / 10
         index += 2
-        self.pack_status = PackStatus(int.from_bytes(data[index: index + 2], "big"))
+        self.pack_status = PackStatus(int.from_bytes(data[index : index + 2], "big"))
         index += 2
-        self.voltage_status = VoltageStatus(int.from_bytes(data[index: index + 2], "big"))
+        self.voltage_status = VoltageStatus(int.from_bytes(data[index : index + 2], "big"))
         index += 2
         # Filter bit for battery status, according to definition of current state in table 58
-        self.current_state = CurrentState(int.from_bytes(data[index: index + 2], "big") & 0xAFFF)
+        self.current_state = CurrentState(int.from_bytes(data[index : index + 2], "big") & 0xAFFF)
         self.battery_status = BatteryStatus(
-            (int.from_bytes(data[index: index + 2], "big") & 0x7000) >> 12
+            (int.from_bytes(data[index : index + 2], "big") & 0x7000) >> 12
         )
         index += 2
-        self.temperature_state = TemperatureState(int.from_bytes(data[index: index + 2], "big"))
+        self.temperature_state = TemperatureState(int.from_bytes(data[index : index + 2], "big"))
         index += 2
-        self.fet_status = FetStatus(int.from_bytes(data[index: index + 2], "big"))
+        self.fet_status = FetStatus(int.from_bytes(data[index : index + 2], "big"))
         self.current_limit = CurrentLimit(
-            (int.from_bytes(data[index: index + 2], "big") & 0x00F0) >> 4
+            (int.from_bytes(data[index : index + 2], "big") & 0x00F0) >> 4
         )
         index += 2
         self.state_machine = StateMachine(data[index])
         index += 1
-        self.input_output_status = InputOutputStatus(int.from_bytes(data[index: index + 2], "big"))
+        self.input_output_status = InputOutputStatus(int.from_bytes(data[index : index + 2], "big"))
         index += 2
-        self.boot_version = int.from_bytes(data[index: index + 2], "big")
+        self.boot_version = int.from_bytes(data[index : index + 2], "big")
         index += 2
-        self.software_version = int.from_bytes(data[index: index + 2], "big")
+        self.software_version = int.from_bytes(data[index : index + 2], "big")
         index += 2
-        self.number_of_parameters = int.from_bytes(data[index: index + 2], "big")
+        self.number_of_parameters = int.from_bytes(data[index : index + 2], "big")
         index += 2
-        self.maximum_cell_voltage = int.from_bytes(data[index: index + 2], "big") / 1000
+        self.maximum_cell_voltage = int.from_bytes(data[index : index + 2], "big") / 1000
         index += 2
-        self.minimum_cell_voltage = int.from_bytes(data[index: index + 2], "big") / 1000
+        self.minimum_cell_voltage = int.from_bytes(data[index : index + 2], "big") / 1000
         index += 2
-        self.maximum_temperature = int.from_bytes(data[index: index + 2], "big") / 10
+        self.maximum_temperature = int.from_bytes(data[index : index + 2], "big") / 10
         index += 2
-        self.minimum_temperature = int.from_bytes(data[index: index + 2], "big") / 10
+        self.minimum_temperature = int.from_bytes(data[index : index + 2], "big") / 10
         index += 2
-        self.charging_overcurrent_alarm = int.from_bytes(data[index: index + 2], "big") / 10
+        self.charging_overcurrent_alarm = int.from_bytes(data[index : index + 2], "big") / 10
         index += 2
-        self.discharging_overcurrent_alarm = int.from_bytes(data[index: index + 2], "big") / 10
+        self.discharging_overcurrent_alarm = int.from_bytes(data[index : index + 2], "big") / 10
         index += 2
         self.reserved = data[index:]
 
