@@ -24,7 +24,7 @@ class BMSProtocol:
         Returns a list of decoded BMSFrames if packets are completed.
         """
         self._buffer.extend(data)
-        frames = []
+        frames: List[BMSFrame] = []
 
         while True:
             # Look for SOI
